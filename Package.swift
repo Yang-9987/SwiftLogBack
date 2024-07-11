@@ -11,11 +11,20 @@ let package = Package(
             name: "SwiftLogBack",
             targets: ["SwiftLogBack"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.6.1"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.68.0"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "SwiftLogBack"),
+            name: "SwiftLogBack",
+            dependencies: [
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+            ]
+        ),
         .testTarget(
             name: "SwiftLogBackTests",
             dependencies: ["SwiftLogBack"]),
