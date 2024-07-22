@@ -23,7 +23,6 @@
             "rollingPolicy": {
                 "type": "timeBased",
                 "interval": "daily",
-                "maxFileSize": "10MB",
                 "maxRetentionDays": 7
             }
         }

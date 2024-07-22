@@ -146,6 +146,7 @@ public struct FileLogging {
     }
 }
 
+// 文件输出流
 struct FileOutputStream: TextOutputStream {
     // 异常处理
     enum FileHandlerOutputStream: Error {
@@ -209,8 +210,8 @@ public struct RollingFileLogHandler: LogHandler {
         return !metadata.isEmpty ? metadata.map { "\($0)=\($1)" }.joined(separator: " ") : nil
     }
 
-    public init(appender: Appender, fileLogger: FileLogging) {
-        self.appender = appender as! FileAppender
+    public init(appender: Appender, fileLogger: RollingFileLogging) {
+        self.appender = appender as! RollingFileAppender
         self.stream = fileLogger.stream
     }
 
@@ -227,5 +228,56 @@ public struct RollingFileLogHandler: LogHandler {
         var stream = self.stream
         let logMsg = formatMessage(appender: self.appender, label: label, level: level, message: message, metadata: prettyMetadata, source: source, file: file, function: function, line: line)
         stream.write("\(logMsg)")
+    }
+}
+
+public struct RollingFileLogging {
+    let stream: TextOutputStream
+    private var localFile: URL
+    private var appender: Appender
+
+    public init(to localFile: URL, appender: Appender) throws {
+        self.stream = try FileOutputStream(localFile: localFile)
+        self.localFile = localFile
+        self.appender = appender
+    }
+
+    public func handler(label: String) -> RollingFileLogHandler {
+        return RollingFileLogHandler(appender: appender, fileLogger: self)
+    }
+
+    public static func logger(appender: Appender, label: String, localFile url: URL) throws -> Logger {
+        let logging = try FileLogging(to: url, appender: appender)
+        return Logger(label: label, factory: logging.handler)
+    }
+}
+
+// 滚动文件输出流
+struct RollingFileOutputStream: TextOutputStream {
+    // 异常处理
+    enum FileHandlerOutputStream: Error {
+        case couldNotCreateFile // 文件创建失败
+    }
+
+    private let fileHandle: FileHandle
+    let encoding: String.Encoding
+
+    init(localFile url: URL, encoding: String.Encoding = .utf8) throws {
+        do {
+            try createLogDirectoryAndFileIfNeeded(at: url)
+        } catch {
+            throw FileHandlerOutputStream.couldNotCreateFile
+        }
+
+        let fileHandle = try FileHandle(forWritingTo: url)
+        fileHandle.seekToEndOfFile()
+        self.fileHandle = fileHandle
+        self.encoding = encoding
+    }
+
+    mutating func write(_ string: String) {
+        if let data = string.data(using: encoding) {
+            fileHandle.write(data)
+        }
     }
 }
