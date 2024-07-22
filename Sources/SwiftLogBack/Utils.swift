@@ -8,7 +8,7 @@
 import Foundation
 
 // 创建文件
-func createLogDirectoryAndFileIfNeeded(at url: URL) {
+func createLogDirectoryAndFileIfNeeded(at url: URL) throws {
     // 获取文件的父目录
     let directoryURL = url.deletingLastPathComponent()
     // 判断文件夹是否存在

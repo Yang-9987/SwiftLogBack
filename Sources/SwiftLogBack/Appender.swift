@@ -18,32 +18,32 @@ enum LogLevel: String, Codable {
 
 /// protocols: Appender, ConsoleAppenderProtocol, FileAppenderProtocol, RollingFileAppenderProtocol
 // Appender协议
-protocol Appender: Codable {
+public protocol Appender: Codable {
     var type: AppenderEnum { get }
     var logLevel: String { get }
     var format: String { get }
 }
 
 // ConsoleAppenderProtocol
-protocol ConsoleAppenderProtocol: Appender {
+public protocol ConsoleAppenderProtocol: Appender {
     var charset: String { get }
 }
 
 // FileAppenderProtocol
-protocol FileAppenderProtocol: Appender {
+public protocol FileAppenderProtocol: Appender {
     var filePath: String { get }
     var charset: String { get }
 }
 
 // RollingFileAppenderProtocol
-protocol RollingFileAppenderProtocol: Appender {
+public protocol RollingFileAppenderProtocol: Appender {
     var filePath: String { get }
     var charset: String { get }
     var rollingPolicy: RollingPolicy { get }
 }
 
 // RollingPolicy滚动策略
-struct RollingPolicy: Codable {
+public struct RollingPolicy: Codable {
     let type: RollingPolicyType
     let interval: String?
     let maxFileSize: String?
@@ -51,14 +51,14 @@ struct RollingPolicy: Codable {
 }
 
 // RollingPolicyType滚动策略类型
-enum RollingPolicyType: String, Codable {
+public enum RollingPolicyType: String, Codable {
     case timeBased = "timeBased"
     case sizeBased = "sizeBased"
     case timeAndSizeBased = "timeAndSizeBased"
 }
 
 extension RollingPolicyType {
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawValue = try container.decode(String.self)
         guard let rollingPolicy = RollingPolicyType(rawValue: rawValue) else {
@@ -69,7 +69,7 @@ extension RollingPolicyType {
 }
 
 /// Appenders: ConsoleAppender, FileAppender, RollingFileAppender
-enum AppenderEnum: String, Codable, CodingKey {
+public enum AppenderEnum: String, Codable, CodingKey {
     case ConsoleAppender
     case FileAppender
     case RollingFileAppender

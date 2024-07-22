@@ -2,8 +2,21 @@
     "logLevel": "info",
     "appenders": [
         {
+            "type": "ConsoleAppender",
+            "format": "%date %level %metadata %fileLine %n %message %n",
+            "charset": "UTF-8",
+            "logLevel": "info"
+        },
+        {
+            "type": "FileAppender",
+            "format": "%date %level %metadata %fileLine %n %message %n",
+            "charset": "UTF-8",
+            "logLevel": "info",
+            "filePath": "log/logfile.log"
+        },
+        {
             "type": "RollingFileAppender",
-            "format": "%d %p %r %m %c",
+            "format": "%date %level %metadata %fileLine %n %message %n",
             "charset": "UTF-8",
             "logLevel": "info",
             "filePath": "log/logfile.log",
@@ -13,12 +26,6 @@
                 "maxFileSize": "10MB",
                 "maxRetentionDays": 7
             }
-        },
-        {
-            "type": "ConsoleAppender",
-            "format": "%d %p %r %m %c",
-            "charset": "UTF-8",
-            "logLevel": "info"
         }
     ]
 }

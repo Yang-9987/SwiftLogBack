@@ -1,147 +1,231 @@
-////
-////  File.swift
-////  
-////
-////  Created by Yang Jianqi on 2024/7/11.
-////
 //
-//import Foundation
-//import Logging
+//  File.swift
+//  
 //
-//struct FileLogHandler: LogHandler {
+//  Created by Yang Jianqi on 2024/7/11.
 //
-//    let stream: TextOutputStream & Sendable
-//    var label: String = "com.Logger"
-//
-//    private let fileURL: URL
-//    private let rollingPolicy: LogConfiguration.AppenderConfiguration.RollingPolicy?
-//    private let format: String?
-//    private let charset: String?
-//
-//    public var logLevel: Logger.Level = .info
-//
-//    public var metadataProvider: Logger.MetadataProvider?
-//
-//    private var prettyMetadata: String?
-//
-//    init(stream: TextOutputStream & Sendable, label: String, fileURL: URL, rollingPolicy: LogConfiguration.AppenderConfiguration.RollingPolicy?, format: String, charset: String) {
-//        self.stream = stream
-//        self.label = label
-//        self.fileURL = fileURL
-//        self.rollingPolicy = rollingPolicy
-//        self.format = format
-//        self.charset = charset
-//    }
-//
-//    public var metadata = Logger.Metadata() {
-//        didSet {
-//            self.prettyMetadata = self.prettify(metadata)
-//        }
-//    }
-//
-//    public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
-//        get {
-//            return self.metadata[metadataKey]
-//        }
-//        set(newValue) {
-//            self.metadata[metadataKey] = newValue
-//        }
-//    }
-//
-//    private func prettify(_ metadata: Logger.Metadata) -> String? {
-//        return !metadata.isEmpty ? metadata.map { "\($0)=\($1)" }.joined(separator: " ") : nil
-//    }
-//
-//    public func log(level: Logger.Level,
-//                    message: Logger.Message,
-//                    metadata: Logger.Metadata?,
-//                    source: String,
-//                    file: String,
-//                    function: String,
-//                    line: UInt) {
-//        let prettyMetadata = metadata?.isEmpty ?? true
-//            ? self.prettyMetadata
-//            : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
-//        let requestId = self.metadata["requestId"] ?? "nil"
-//    }
-//
-//}
-//
-//// 定义控制台的日志输出Handler
-//public struct ConsoleLogHandler: LogHandler {
-//
-//    private let stream: TextOutputStream & Sendable = ConsoleOutputStream()
-//    private var label: String = "com.Logger"
-//
-//    public var logLevel: Logger.Level = .info
-//
-//    public var metadataProvider: Logger.MetadataProvider?
-//
-//    private var prettyMetadata: String?
-//    public var metadata = Logger.Metadata() {
-//        didSet {
-//            self.prettyMetadata = self.prettify(metadata)
-//        }
-//    }
-//
-//    public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
-//        get {
-//            return self.metadata[metadataKey]
-//        }
-//        set(newValue) {
-//            self.metadata[metadataKey] = newValue
-//        }
-//    }
-//
-//    private func prettify(_ metadata: Logger.Metadata) -> String? {
-//        return !metadata.isEmpty ? metadata.map { "\($0)=\($1)" }.joined(separator: " ") : nil
-//    }
-//
-//    public func log(level: Logger.Level,
-//                    message: Logger.Message,
-//                    metadata: Logger.Metadata?,
-//                    source: String,
-//                    file: String,
-//                    function: String,
-//                    line: UInt) {
-//        let prettyMetadata = metadata?.isEmpty ?? true
-//            ? self.prettyMetadata
-//            : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
-//
-//        // 配置颜色，让日志更容易阅读
-//        let levelColor: String
-//        switch level {
-//        case .trace:
-//            levelColor = ANSIColor.white.color // White
-//        case .debug:
-//            levelColor = ANSIColor.cyan.color // Cyan
-//        case .info:
-//            levelColor = ANSIColor.green.color // Green
-//        case .notice:
-//            levelColor = ANSIColor.blue.color // Blue
-//        case .warning:
-//            levelColor = ANSIColor.yellow.color // Yellow
-//        case .error:
-//            levelColor = ANSIColor.red.color // Red
-//        case .critical:
-//            levelColor = ANSIColor.magenta.color // Magenta
-//        }
-//        var stream = self.stream
-//        // stream.write("\(LogColor.white.color)\(self.timestamp()) \(levelColor)[\(level)] \(LogColor.green.color)[\(label)]: \(LogColor.green.color)\(prettyMetadata.map { "\($0)" } ?? "") \(LogColor.cyan.color)(\(file):\(line)\n\(LogColor.white.color)\(message)")
-//        stream.write("\(self.timestamp()) [\(level)] [\(label)]: \(prettyMetadata.map { "\($0)" } ?? "") (\(file):\(line))\n\(message)\n")
-//    }
-//
-//    private func timestamp() -> String {
-//       // 返回当前时间，格式为"YYYY-MM-dd HH:mm:ss"
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
-//        return formatter.string(from: Date())
-//    }
-//
-//}
-//
-//struct ConsoleOutputStream: TextOutputStream {
-//    mutating func write(_ string: String) {
-//        print(string)
-//    }
-//}
+
+import Foundation
+import Logging
+
+/// 控制台的日志输出Handler
+public struct ConsoleLogHandler: LogHandler {
+
+    // 控制台日志输出流
+    private let stream: TextOutputStream & Sendable = ConsoleOutputStream()
+    // 日志标签
+    private var label: String = "console.Logger"
+    // appender配置
+    public var appender: Appender
+
+    public var logLevel: Logger.Level = .info
+
+    public var metadataProvider: Logger.MetadataProvider?
+
+    private var prettyMetadata: String?
+    public var metadata = Logger.Metadata() {
+        didSet {
+            self.prettyMetadata = self.prettify(metadata)
+        }
+    }
+
+    public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
+        get {
+            return self.metadata[metadataKey]
+        }
+        set(newValue) {
+            self.metadata[metadataKey] = newValue
+        }
+    }
+
+    private func prettify(_ metadata: Logger.Metadata) -> String? {
+        return !metadata.isEmpty ? metadata.map { "\($0)=\($1)" }.joined(separator: " ") : nil
+    }
+
+    public init(appender: Appender) {
+        self.appender = appender as! ConsoleAppender
+    }
+
+    public func log(level: Logger.Level,
+                    message: Logger.Message,
+                    metadata: Logger.Metadata?,
+                    source: String,
+                    file: String,
+                    function: String,
+                    line: UInt) {
+        let prettyMetadata = metadata?.isEmpty ?? true
+            ? self.prettyMetadata
+            : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
+        var stream = self.stream
+        let logMsg = formatMessage(appender: self.appender, label: label, level: level, message: message, metadata: prettyMetadata, source: source, file: file, function: function, line: line)
+        stream.write("\(logMsg)")
+    }
+
+}
+
+// 控制台输出流
+struct ConsoleOutputStream: TextOutputStream {
+    mutating func write(_ string: String) {
+        print(string)
+    }
+}
+
+/// 文件日志输出Handler
+public struct FileLogHandler: LogHandler {
+
+    // 文件日志输出流
+    private let stream: TextOutputStream & Sendable
+    // 日志标签
+    private var label: String = "file.Logger"
+    // appender配置
+    public var appender: Appender
+
+    public var logLevel: Logger.Level = .info
+
+    public var metadataProvider: Logger.MetadataProvider?
+
+    private var prettyMetadata: String?
+    public var metadata = Logger.Metadata() {
+        didSet {
+            self.prettyMetadata = self.prettify(metadata)
+        }
+    }
+
+    public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
+        get {
+            return self.metadata[metadataKey]
+        }
+        set(newValue) {
+            self.metadata[metadataKey] = newValue
+        }
+    }
+
+    private func prettify(_ metadata: Logger.Metadata) -> String? {
+        return !metadata.isEmpty ? metadata.map { "\($0)=\($1)" }.joined(separator: " ") : nil
+    }
+
+    public init(appender: Appender, fileLogger: FileLogging) {
+        self.appender = appender as! FileAppender
+        self.stream = fileLogger.stream
+    }
+
+    public func log(level: Logger.Level,
+                    message: Logger.Message,
+                    metadata: Logger.Metadata?,
+                    source: String,
+                    file: String,
+                    function: String,
+                    line: UInt) {
+        let prettyMetadata = metadata?.isEmpty ?? true
+            ? self.prettyMetadata
+            : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
+        var stream = self.stream
+        let logMsg = formatMessage(appender: self.appender, label: label, level: level, message: message, metadata: prettyMetadata, source: source, file: file, function: function, line: line)
+        stream.write("\(logMsg)")
+    }
+}
+
+public struct FileLogging {
+    let stream: TextOutputStream
+    private var localFile: URL
+    private var appender: Appender
+
+    public init(to localFile: URL, appender: Appender) throws {
+        self.stream = try FileOutputStream(localFile: localFile)
+        self.localFile = localFile
+        self.appender = appender
+    }
+
+    public func handler(label: String) -> FileLogHandler {
+        return FileLogHandler(appender: appender, fileLogger: self)
+    }
+
+    public static func logger(appender: Appender, label: String, localFile url: URL) throws -> Logger {
+        let logging = try FileLogging(to: url, appender: appender)
+        return Logger(label: label, factory: logging.handler)
+    }
+}
+
+struct FileOutputStream: TextOutputStream {
+    // 异常处理
+    enum FileHandlerOutputStream: Error {
+        case couldNotCreateFile // 文件创建失败
+    }
+
+    private let fileHandle: FileHandle
+    let encoding: String.Encoding
+
+    init(localFile url: URL, encoding: String.Encoding = .utf8) throws {
+        do {
+            try createLogDirectoryAndFileIfNeeded(at: url)
+        } catch {
+            throw FileHandlerOutputStream.couldNotCreateFile
+        }
+
+        let fileHandle = try FileHandle(forWritingTo: url)
+        fileHandle.seekToEndOfFile()
+        self.fileHandle = fileHandle
+        self.encoding = encoding
+    }
+
+    mutating func write(_ string: String) {
+        if let data = string.data(using: encoding) {
+            fileHandle.write(data)
+        }
+    }
+}
+
+/// 日志滚动文件输出Handler
+public struct RollingFileLogHandler: LogHandler {
+
+    // 文件日志输出流
+    private let stream: TextOutputStream & Sendable
+    // 日志标签
+    private var label: String = "rollingFile.Logger"
+    // appender配置
+    public var appender: Appender
+
+    public var logLevel: Logger.Level = .info
+
+    public var metadataProvider: Logger.MetadataProvider?
+
+    private var prettyMetadata: String?
+    public var metadata = Logger.Metadata() {
+        didSet {
+            self.prettyMetadata = self.prettify(metadata)
+        }
+    }
+
+    public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
+        get {
+            return self.metadata[metadataKey]
+        }
+        set(newValue) {
+            self.metadata[metadataKey] = newValue
+        }
+    }
+
+    private func prettify(_ metadata: Logger.Metadata) -> String? {
+        return !metadata.isEmpty ? metadata.map { "\($0)=\($1)" }.joined(separator: " ") : nil
+    }
+
+    public init(appender: Appender, fileLogger: FileLogging) {
+        self.appender = appender as! FileAppender
+        self.stream = fileLogger.stream
+    }
+
+    public func log(level: Logger.Level,
+                    message: Logger.Message,
+                    metadata: Logger.Metadata?,
+                    source: String,
+                    file: String,
+                    function: String,
+                    line: UInt) {
+        let prettyMetadata = metadata?.isEmpty ?? true
+            ? self.prettyMetadata
+            : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
+        var stream = self.stream
+        let logMsg = formatMessage(appender: self.appender, label: label, level: level, message: message, metadata: prettyMetadata, source: source, file: file, function: function, line: line)
+        stream.write("\(logMsg)")
+    }
+}
