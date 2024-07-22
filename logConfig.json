@@ -1,0 +1,24 @@
+{
+    "logLevel": "info",
+    "appenders": [
+        {
+            "type": "RollingFileAppender",
+            "format": "%d %p %r %m %c",
+            "charset": "UTF-8",
+            "logLevel": "info",
+            "filePath": "log/logfile.log",
+            "rollingPolicy": {
+                "type": "timeBased",
+                "interval": "daily",
+                "maxFileSize": "10MB",
+                "maxRetentionDays": 7
+            }
+        },
+        {
+            "type": "ConsoleAppender",
+            "format": "%d %p %r %m %c",
+            "charset": "UTF-8",
+            "logLevel": "info"
+        }
+    ]
+}

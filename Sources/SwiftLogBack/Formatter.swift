@@ -6,3 +6,16 @@
 //
 
 import Foundation
+
+enum LogParam: String {
+
+    case date = "%date"
+    case level = "%level"
+    case label = "%label"
+    case metadata = "%metadata"
+    case method = "%method"
+    case fileLine = "%fileLine"
+    case message = "%message"
+    case newLine = "%n"
+
+}
