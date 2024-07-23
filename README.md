@@ -1,5 +1,5 @@
 # SwiftLogBack
-A log framework. Just like logback in Spring. You can config by a json file to customize your log format and many things.
+A log framework in Swift. It just like logback in Spring. You can config by a json file to customize your log format and other configuration.
 
 # How to use
 ```swift
@@ -54,5 +54,6 @@ This is a example of config file:
 # Notice
 The RollingFileAppender is developing now. It will be finished soon.
 
-# Email
+# Contact Email And Wechat
 This is my first open source, if you have any idea or advice please tell me [1013404703@qq.com]. I will try my best to do it!
+I also want to do more interesting things with you! My wechat is yjq9987, welcome to add me!
