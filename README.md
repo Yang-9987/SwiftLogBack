@@ -17,9 +17,42 @@ do {
 ```
 
 # How to write config json file
-```swift
-Writing...
+This is a example of config file:
+```json
+{
+    "logLevel": "info",
+    "appenders": [
+        {
+            "type": "ConsoleAppender",
+            "format": "%date %level %metadata %fileLine %n %message %n",
+            "charset": "UTF-8",
+            "logLevel": "info"
+        },
+        {
+            "type": "FileAppender",
+            "format": "%date %level %metadata %fileLine %n %message %n",
+            "charset": "UTF-8",
+            "logLevel": "info",
+            "filePath": "log/logfile.log"
+        },
+        {
+            "type": "RollingFileAppender",
+            "format": "%date %level %metadata %fileLine %n %message %n",
+            "charset": "UTF-8",
+            "logLevel": "info",
+            "filePath": "log/logfile.log",
+            "rollingPolicy": {
+                "type": "timeBased",
+                "interval": "daily",
+                "maxRetentionDays": 7
+            }
+        }
+    ]
+}
 ```
+
+# Notice
+The RollingFileAppender is developing now. It will be finished soon.
 
 # Email
 This is my first open source, if you have any idea or advice please tell me [1013404703@qq.com]. I will try my best to do it!
