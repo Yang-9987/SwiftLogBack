@@ -143,4 +143,21 @@ final class SwiftLogBackTests: XCTestCase {
             print("nil")
         }
     }
+
+    func testAutoConfig() {
+        // Writing Test Methods
+        let url = "/Users/yangjianqi/Documents/iOS_project/SwiftLogBack/logConfig.json"
+        let fileURL = URL(fileURLWithPath: url)
+        do {
+            if let config = loadConfig(configUrl: fileURL) {
+                try configToLoggingSystem(config: config)
+            } else {
+                print("nil")
+            }
+        } catch {
+            print("Failed to load file appender: \(error)")
+        }
+        let logger = Logger(label: "com.example.test")
+        logger.info("Hello, world!")
+    }
 }

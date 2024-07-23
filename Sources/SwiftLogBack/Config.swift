@@ -46,3 +46,54 @@ func loadConfig(configUrl: URL) -> LogConfig? {
         return nil
     }
 }
+
+func configToLoggingSystem(config: LogConfig) throws {
+    let logger = Logger(label: "configToLogging")
+    var handlers:[LogHandler] = []
+    config.appenders.forEach { appender in
+        switch appender.appender.type {
+        case .ConsoleAppender:
+            let consoleAppender = appender.appender as! ConsoleAppender
+            handlers.append(ConsoleLogHandler(appender: consoleAppender))
+        case .FileAppender:
+            let fileAppender = appender.appender as! FileAppender
+            var path = fileAppender.filePath
+            if(path.starts(with: "/")){
+                logger.info("configPath: \(path)")
+            } else {
+                // 获取当前工作目录
+                let currentPath = FileManager.default.currentDirectoryPath
+                path = currentPath + "/" + path
+                logger.info("configPath: \(path)")
+            }
+            let fileURL = URL(fileURLWithPath: path)
+            let fileLogging = try? FileLogging(to: fileURL, appender: fileAppender)
+            if let fileLogging = fileLogging {
+                handlers.append(fileLogging.handler(label: "fileLogger"))
+            } else {
+                logger.error("Failed to load fileAppender")
+            }
+        case .RollingFileAppender:
+            let rollingFileAppender = appender.appender as! RollingFileAppender
+            var path = rollingFileAppender.filePath
+            if(path.starts(with: "/")){
+                logger.info("configPath: \(path)")
+            } else {
+                // 获取当前工作目录
+                let currentPath = FileManager.default.currentDirectoryPath
+                path = currentPath + "/" + path
+                logger.info("configPath: \(path)")
+            }
+            let fileURL = URL(fileURLWithPath: path)
+            let rollingFileLogging = try? RollingFileLogging(to: fileURL, appender: rollingFileAppender)
+            if let rollingFileLogging = rollingFileLogging {
+                handlers.append(rollingFileLogging.handler(label: "rollingFileLogger"))
+            } else {
+                logger.error("Failed to load rollingFileAppender")
+            }
+        }
+    }
+    LoggingSystem.bootstrap{ _ in
+        return MultiplexLogHandler(handlers)
+    }
+}
